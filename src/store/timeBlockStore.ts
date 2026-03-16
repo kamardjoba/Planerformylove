@@ -101,11 +101,11 @@ export const COLOR_MAP: Record<TimeBlockColor, string> = {
   violet: "bg-violet-500/90",
 };
 
-export const COLOR_OPTIONS: { value: TimeBlockColor; label: string }[] = [
+export const COLOR_OPTIONS: Array<{ value: TimeBlockColor; label: string }> = [
   { value: "indigo", label: "Indigo" },
   { value: "emerald", label: "Emerald" },
   { value: "amber", label: "Amber" },
   { value: "rose", label: "Rose" },
   { value: "sky", label: "Sky" },
-  { value: "violet", label: "Violet" },
-};
+  { value: "violet", label: "Violet" }
+];

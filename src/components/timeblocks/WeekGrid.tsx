@@ -7,13 +7,15 @@ import {
   DAY_LABELS,
   HOUR_START,
   HOUR_END,
-  COLOR_MAP,
+  TOTAL_MINUTES,
+  minutesToLabel,
+  hourToLabel,
+  COLOR_HEX,
 } from "@/store/timeBlockStore";
 import type { TimeBlock } from "@/types";
 
 const ROWS = HOUR_END - HOUR_START;
 const ROW_HEIGHT = 18;
-const TOTAL_MINUTES = ROWS * 60;
 const START_BASE = HOUR_START * 60;
 
 interface WeekGridProps {
@@ -35,7 +37,7 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft">
       <div className="flex border-b border-border bg-surface-muted/60">
-        <div className="w-9 shrink-0" />
+        <div className="w-10 shrink-0" />
         {DAY_LABELS.map((label, i) => (
           <button
             key={label}
@@ -48,14 +50,14 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
         ))}
       </div>
       <div className="flex" style={{ height: ROWS * ROW_HEIGHT }}>
-        <div className="flex w-9 shrink-0 flex-col border-r border-border">
+        <div className="flex w-10 shrink-0 flex-col border-r border-border">
           {Array.from({ length: ROWS }, (_, i) => (
             <div
               key={i}
               className="flex items-center justify-end pr-1 text-[10px] text-text-tertiary"
               style={{ height: ROW_HEIGHT }}
             >
-              {HOUR_START + i}
+              {hourToLabel(HOUR_START + i)}
             </div>
           ))}
         </div>
@@ -73,18 +75,19 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
                 ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
               const heightPct =
                 ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
-              const colorClass = COLOR_MAP[block.color] || COLOR_MAP.indigo;
+              const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
               return (
                 <motion.button
-                  key={block.id}
+                  key={`${block.id}-${block.dayIndex}-${block.startMinutes}-${block.endMinutes}`}
                   type="button"
                   layout
                   initial={false}
-                  className={`absolute left-0.5 right-0.5 rounded ${colorClass} text-white shadow-sm`}
+                  className="absolute left-0.5 right-0.5 rounded text-white shadow-sm"
                   style={{
                     top: `${topPct}%`,
                     height: `${Math.max(heightPct, 5)}%`,
                     minHeight: 14,
+                    backgroundColor: bgColor,
                   }}
                   onClick={(e) => {
                     e.stopPropagation();

@@ -4,10 +4,10 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { GripVertical, Trash2, MoreHorizontal } from "lucide-react";
 import type { TimeBlock } from "@/types";
-import { useTimeBlockStore, COLOR_MAP, minutesToLabel } from "@/store/timeBlockStore";
+import { useTimeBlockStore, COLOR_HEX, minutesToLabel } from "@/store/timeBlockStore";
 import { HOUR_START, HOUR_END } from "@/store/timeBlockStore";
 
-const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60;
+const TOTAL_MINUTES = (24 - HOUR_START) * 60;
 const START_BASE = HOUR_START * 60;
 const MIN_DURATION = 30;
 
@@ -24,7 +24,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const startEnd = useRef(0);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
-  const colorClass = COLOR_MAP[block.color] || COLOR_MAP.indigo;
+  const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
 
   const topPct = ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
   const heightPct =
@@ -45,7 +45,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     const deltaMinutes = Math.round(deltaY / pixelsPerMinute);
     const newEnd = Math.max(
       block.startMinutes + MIN_DURATION,
-      Math.min(23 * 60, startEnd.current + deltaMinutes)
+      Math.min(24 * 60, startEnd.current + deltaMinutes)
     );
     resizeBlock(block.id, newEnd);
   };
@@ -96,7 +96,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       }}
     >
       <div
-        className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl ${colorClass} text-white`}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl text-white"
+        style={{ backgroundColor: bgColor }}
       >
         <div className="flex items-start gap-1 p-2">
           <div

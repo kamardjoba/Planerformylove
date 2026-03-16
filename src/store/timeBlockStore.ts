@@ -83,13 +83,18 @@ export const useTimeBlockStore = create<TimeBlockState>()(
 
 export const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 export const HOUR_START = 6;
-export const HOUR_END = 23;
+export const HOUR_END = 24;
 export const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60;
 
 export function minutesToLabel(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+}
+
+export function hourToLabel(hour: number): string {
+  if (hour === 24) return "24:00";
+  return `${hour.toString().padStart(2, "0")}:00`;
 }
 
 export const COLOR_MAP: Record<TimeBlockColor, string> = {
@@ -99,6 +104,15 @@ export const COLOR_MAP: Record<TimeBlockColor, string> = {
   rose: "bg-rose-500/90",
   sky: "bg-sky-500/90",
   violet: "bg-violet-500/90",
+};
+
+export const COLOR_HEX: Record<TimeBlockColor, string> = {
+  indigo: "#6366f1",
+  emerald: "#10b981",
+  amber: "#f59e0b",
+  rose: "#f43f5e",
+  sky: "#0ea5e9",
+  violet: "#8b5cf6",
 };
 
 export const COLOR_OPTIONS: Array<{ value: TimeBlockColor; label: string }> = [

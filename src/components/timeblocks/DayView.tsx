@@ -3,13 +3,13 @@
 import { useRef, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
-import { useTimeBlockStore, DAY_LABELS, HOUR_START, HOUR_END, minutesToLabel } from "@/store/timeBlockStore";
+import { useTimeBlockStore, DAY_LABELS, HOUR_START, HOUR_END, minutesToLabel, hourToLabel } from "@/store/timeBlockStore";
 import { BlockCard } from "./BlockCard";
 import type { TimeBlock } from "@/types";
 
-const ROWS = HOUR_END - HOUR_START;
 const ROW_HEIGHT = 48;
-const TOTAL_MINUTES = ROWS * 60;
+const ROWS = HOUR_END - HOUR_START + 1;
+const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60;
 const START_BASE = HOUR_START * 60;
 
 interface DayViewProps {
@@ -35,7 +35,7 @@ export function DayView({
   const handleBlockDragEnd = useCallback(
     (block: TimeBlock, newStartMinutes: number) => {
       const duration = block.endMinutes - block.startMinutes;
-      const newEnd = Math.min(23 * 60, newStartMinutes + duration);
+      const newEnd = Math.min(24 * 60, newStartMinutes + duration);
       moveBlock(block.id, dayIndex, newStartMinutes, newEnd);
     },
     [dayIndex, moveBlock]
@@ -111,7 +111,7 @@ export function DayView({
               style={{ height: ROW_HEIGHT }}
             >
               <div className="w-12 shrink-0 py-1 text-xs text-text-tertiary">
-                {minutesToLabel((HOUR_START + i) * 60)}
+                {hourToLabel(HOUR_START + i)}
               </div>
               <div className="flex-1" />
             </div>

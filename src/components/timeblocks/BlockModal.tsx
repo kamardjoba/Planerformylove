@@ -5,13 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import type { TimeBlock, TimeBlockColor } from "@/types";
 import type { Priority } from "@/types";
-import { useTimeBlockStore, COLOR_OPTIONS, HOUR_START, HOUR_END } from "@/store/timeBlockStore";
+import { useTimeBlockStore, COLOR_OPTIONS, HOUR_START, HOUR_END, minutesToLabel } from "@/store/timeBlockStore";
 import { DAY_LABELS } from "@/store/timeBlockStore";
 
-const HOURS = Array.from(
-  { length: HOUR_END - HOUR_START },
-  (_, i) => HOUR_START + i
-);
+function minutesToTime(minutes: number): { hour: number; minute: number } {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return { hour: h, minute: m };
+}
+function timeToMinutes(hour: number, minute: number): number {
+  return hour * 60 + minute;
+}
 
 interface BlockModalProps {
   block: TimeBlock | null;
@@ -28,7 +32,9 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
   const [color, setColor] = useState<TimeBlockColor>("indigo");
   const [priority, setPriority] = useState<Priority>("medium");
   const [startHour, setStartHour] = useState(9);
+  const [startMinute, setStartMinute] = useState(0);
   const [endHour, setEndHour] = useState(10);
+  const [endMinute, setEndMinute] = useState(0);
   const [selectedDay, setSelectedDay] = useState(dayIndex);
 
   useEffect(() => {
@@ -36,25 +42,33 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
       setTitle(block.title);
       setColor(block.color);
       setPriority(block.priority);
-      setStartHour(Math.floor(block.startMinutes / 60));
-      setEndHour(Math.floor(block.endMinutes / 60));
+      const start = minutesToTime(block.startMinutes);
+      const end = minutesToTime(block.endMinutes);
+      setStartHour(start.hour);
+      setStartMinute(start.minute);
+      setEndHour(end.hour);
+      setEndMinute(end.minute);
     } else {
       setTitle("");
       setColor("indigo");
       setPriority("medium");
       setStartHour(9);
+      setStartMinute(0);
       setEndHour(10);
+      setEndMinute(0);
       setSelectedDay(dayIndex);
     }
   }, [block, dayIndex]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const startMinutes = Math.max(HOUR_START * 60, startHour * 60);
-    const endMinutes = Math.min(
-      HOUR_END * 60,
-      Math.max(startMinutes + 30, endHour * 60)
+    const startMinutes = Math.max(
+      HOUR_START * 60,
+      timeToMinutes(startHour, startMinute)
     );
+    let endMinutes = timeToMinutes(endHour, endMinute);
+    if (endMinutes <= startMinutes) endMinutes = startMinutes + 30;
+    endMinutes = Math.min(HOUR_END * 60, Math.max(startMinutes + 30, endMinutes));
     if (isEdit && block) {
       updateBlock(block.id, {
         title: title.trim() || "Block",
@@ -142,33 +156,60 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                 <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                   Start
                 </label>
-                <select
-                  value={startHour}
-                  onChange={(e) => setStartHour(parseInt(e.target.value, 10))}
-                  className="w-full rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-text-primary focus:border-accent focus:outline-none"
-                >
-                  {HOURS.map((h) => (
-                    <option key={h} value={h}>
-                      {h.toString().padStart(2, "0")}:00
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min={HOUR_START}
+                    max={23}
+                    value={startHour}
+                    onChange={(e) => setStartHour(parseInt(e.target.value, 10) || 0)}
+                    className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
+                  />
+                  <span className="flex items-center text-text-tertiary">:</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={59}
+                    value={startMinute}
+                    onChange={(e) => setStartMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
+                  />
+                </div>
+                <p className="mt-0.5 text-xs text-text-tertiary">
+                  {minutesToLabel(timeToMinutes(startHour, startMinute))}
+                </p>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-text-secondary">
-                  End
+                  End (до 24:00)
                 </label>
-                <select
-                  value={endHour}
-                  onChange={(e) => setEndHour(parseInt(e.target.value, 10))}
-                  className="w-full rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-text-primary focus:border-accent focus:outline-none"
-                >
-                  {HOURS.map((h) => (
-                    <option key={h} value={h}>
-                      {h.toString().padStart(2, "0")}:00
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min={HOUR_START}
+                    max={24}
+                    value={endHour}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10) || 0;
+                      setEndHour(v);
+                      if (v === 24) setEndMinute(0);
+                    }}
+                    className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
+                  />
+                  <span className="flex items-center text-text-tertiary">:</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={59}
+                    value={endMinute}
+                    onChange={(e) => setEndMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
+                    disabled={endHour === 24}
+                  />
+                </div>
+                <p className="mt-0.5 text-xs text-text-tertiary">
+                  {endHour === 24 ? "24:00" : minutesToLabel(timeToMinutes(endHour, endMinute))}
+                </p>
               </div>
             </div>
             <div>

@@ -24,7 +24,7 @@ export function TimeBlockPlanner() {
   };
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col pb-[5.5rem]">
+    <div className="relative flex min-h-0 flex-1 flex-col pb-14">
       <AnimatePresence mode="wait">
         {viewMode === "week" ? (
           <motion.div

@@ -6,11 +6,11 @@ import { TimeBlockPlanner } from "@/components/timeblocks/TimeBlockPlanner";
 
 export default function TimeBlocksPage() {
   return (
-    <div className="mx-auto flex min-h-full max-w-4xl flex-col px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
+    <div className="flex min-h-full flex-col">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-3 shrink-0"
+        className="mb-3 shrink-0 px-4 pt-4 sm:px-6 sm:pt-5 md:px-8 md:pt-6"
       >
         <h1 className="flex items-center gap-2 text-xl font-semibold text-text-primary sm:text-2xl">
           <LayoutGrid className="h-6 w-6 text-accent" />

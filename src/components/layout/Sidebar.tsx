@@ -14,6 +14,7 @@ import {
   Moon,
   Flame,
   X,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { Button } from "@/components/ui/Button";
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/planner", label: "Planner", icon: ListTodo },
   { href: "/app/calendar", label: "Calendar", icon: Calendar },
+  { href: "/app/diary", label: "Diary", icon: BookOpen },
   { href: "/app/focus", label: "Focus", icon: Target },
   { href: "/app/stats", label: "Statistics", icon: BarChart3 },
   { href: "/app/settings", label: "Settings", icon: Settings },

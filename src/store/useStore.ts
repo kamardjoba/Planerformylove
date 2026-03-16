@@ -11,6 +11,7 @@ const defaultSettings: UserSettings = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   notifications: true,
+  diaryWeekMode: "work",
 };
 
 interface AppState {

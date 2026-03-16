@@ -8,12 +8,14 @@ import {
   ListTodo,
   Target,
   BarChart3,
+  BookOpen,
 } from "lucide-react";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/planner", label: "Planner", icon: ListTodo },
   { href: "/app/calendar", label: "Calendar", icon: Calendar },
+  { href: "/app/diary", label: "Diary", icon: BookOpen },
   { href: "/app/focus", label: "Focus", icon: Target },
   { href: "/app/stats", label: "Stats", icon: BarChart3 },
 ];

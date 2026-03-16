@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Moon, Sun, Bell, Clock } from "lucide-react";
+import { Moon, Sun, Bell, Clock, CalendarDays } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useStore } from "@/store/useStore";
+import { WeekModeSelector } from "@/components/diary/WeekModeSelector";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -120,6 +121,20 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+          <h2 className="mb-4 flex items-center gap-2 font-medium text-text-primary">
+            <CalendarDays className="h-4 w-4 text-text-tertiary" />
+            Weekly Diary
+          </h2>
+          <p className="mb-3 text-sm text-text-secondary">
+            Which days to show in the diary
+          </p>
+          <WeekModeSelector
+            value={settings.diaryWeekMode ?? "work"}
+            onChange={(diaryWeekMode) => updateSettings({ diaryWeekMode })}
+          />
         </div>
 
         <div className="rounded-2xl border border-border bg-surface-elevated p-6">

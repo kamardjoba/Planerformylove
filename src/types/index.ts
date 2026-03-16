@@ -37,4 +37,28 @@ export interface UserSettings {
   shortBreakMinutes: number;
   longBreakMinutes: number;
   notifications: boolean;
+  diaryWeekMode: "work" | "full";
+}
+
+export type WeekdayKey = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+
+export interface DiaryCheckItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface DayEntry {
+  notes: string;
+  reflection: string;
+  tasks: DiaryCheckItem[];
+  mood: string | null;
+  productivityScore: number;
+  isHighlighted: boolean;
+}
+
+export interface WeeklyReflection {
+  whatWentWell: string;
+  whatToImprove: string;
+  achievement: string;
 }

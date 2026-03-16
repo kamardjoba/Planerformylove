@@ -6,7 +6,7 @@ import { TimeBlockPlanner } from "@/components/timeblocks/TimeBlockPlanner";
 
 export default function TimeBlocksPage() {
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-4xl flex-col px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
+    <div className="mx-auto flex min-h-[calc(100vh-8.5rem)] max-w-4xl flex-col px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

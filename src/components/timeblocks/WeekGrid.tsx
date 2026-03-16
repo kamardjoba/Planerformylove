@@ -33,7 +33,7 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
   }, [blocks]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft">
+    <div className="flex min-h-[calc(100vh-14rem)] flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft">
       <div className="flex shrink-0 border-b border-border bg-surface-muted/60">
         <div className="w-10 shrink-0" />
         {DAY_LABELS.map((label, i) => (

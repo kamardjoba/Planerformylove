@@ -5,6 +5,8 @@ const { startMessage, buttonLabel } = require("./bot-content.js");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEB_APP_URL = process.env.WEB_APP_URL || "https://dailyforsweatheart.netlify.app/";
+const WEB_APP_URL_2 = "https://ru.pikbest.com/video/funny-cat-dancing-meme-green-screen-video_10044028.html";
+
 
 if (!BOT_TOKEN) {
   console.error("Укажи BOT_TOKEN в переменных окружения (например в .env)");
@@ -16,7 +18,7 @@ const bot = new Telegraf(BOT_TOKEN);
 bot.start((ctx) => {
   return ctx.reply(
     startMessage,
-    Markup.inlineKeyboard([[Markup.button.url(buttonLabel, WEB_APP_URL)]])
+    Markup.inlineKeyboard([[Markup.button.url(buttonLabel, WEB_APP_URL_2)]])
   );
 });
 

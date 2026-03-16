@@ -3,12 +3,20 @@
  * чтобы Telegram слал сообщения бота на твой сайт.
  *
  * Как запустить:
- * 1. В папке telegram-bot создай .env с BOT_TOKEN=твой_токен
- * 2. Подставь свой домен Netlify в WEBHOOK_BASE ниже (или в .env как WEB_APP_URL)
- * 3. В терминале: cd telegram-bot && node set-webhook.js
+ * 1. В папке telegram-bot: npm install  (один раз)
+ * 2. Создай .env с BOT_TOKEN=твой_токен и при необходимости WEB_APP_URL=...
+ * 3. node set-webhook.js
  */
 
-require("dotenv").config();
+try {
+  require("dotenv").config();
+} catch (e) {
+  if (e.code === "MODULE_NOT_FOUND") {
+    console.error("Сначала установи зависимости: npm install");
+    process.exit(1);
+  }
+  throw e;
+}
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBHOOK_BASE =

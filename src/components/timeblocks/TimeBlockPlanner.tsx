@@ -24,7 +24,7 @@ export function TimeBlockPlanner() {
   };
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col pb-24">
+    <div className="relative flex min-h-0 flex-1 flex-col pb-[5.5rem]">
       <AnimatePresence mode="wait">
         {viewMode === "week" ? (
           <motion.div
@@ -46,7 +46,7 @@ export function TimeBlockPlanner() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", damping: 25 }}
-            className="h-[calc(100vh-8rem)] min-h-[400px]"
+            className="h-[calc(100vh-5rem)] min-h-[420px]"
           >
             <DayView
               dayIndex={selectedDayIndex}

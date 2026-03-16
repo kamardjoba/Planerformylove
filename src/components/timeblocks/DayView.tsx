@@ -100,10 +100,13 @@ export function DayView({
       <div
         ref={timelineRef}
         id="day-timeline-height"
-        className="relative flex-1 overflow-y-auto"
-        style={{ minHeight: ROWS * ROW_HEIGHT }}
+        className="relative flex-1 overflow-y-auto overflow-x-hidden"
+        style={{ minHeight: 0 }}
       >
-        <div className="relative" style={{ height: ROWS * ROW_HEIGHT }}>
+        <div
+          className="relative pb-4"
+          style={{ height: ROWS * ROW_HEIGHT, minHeight: ROWS * ROW_HEIGHT }}
+        >
           {Array.from({ length: ROWS }, (_, i) => (
             <div
               key={i}

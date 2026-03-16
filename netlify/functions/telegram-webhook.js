@@ -1,16 +1,15 @@
 const { Telegraf, Markup } = require("telegraf");
-const { startMessage, buttonLabel } = require("../../telegram-bot/bot-content.js");
+const { startMessage, buttonLabel, buttonUrl } = require("../../telegram-bot/bot-content.js");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEB_APP_URL =
-  process.env.WEB_APP_URL || "https://dailyforsweatheart.netlify.app/";
+const buttonLink = process.env.WEB_APP_URL || buttonUrl;
 
 const bot = new Telegraf(BOT_TOKEN, { telegram: { webhookReply: true } });
 
 bot.start((ctx) => {
   return ctx.reply(
     startMessage,
-    Markup.inlineKeyboard([[Markup.button.url(buttonLabel, WEB_APP_URL)]])
+    Markup.inlineKeyboard([[Markup.button.url(buttonLabel, buttonLink)]])
   );
 });
 

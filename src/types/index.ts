@@ -62,3 +62,22 @@ export interface WeeklyReflection {
   whatToImprove: string;
   achievement: string;
 }
+
+// Time Block Planner (week grid, day view)
+export type TimeBlockColor =
+  | "indigo"
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "sky"
+  | "violet";
+
+export interface TimeBlock {
+  id: string;
+  dayIndex: number; // 0 = Mon .. 4 = Fri
+  startMinutes: number; // minutes from midnight (e.g. 9*60 = 09:00)
+  endMinutes: number;
+  title: string;
+  color: TimeBlockColor;
+  priority: Priority;
+}

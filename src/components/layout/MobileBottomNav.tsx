@@ -9,6 +9,7 @@ import {
   Target,
   BarChart3,
   BookOpen,
+  LayoutGrid,
 } from "lucide-react";
 
 const navItems = [
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/app/planner", label: "Planner", icon: ListTodo },
   { href: "/app/calendar", label: "Calendar", icon: Calendar },
   { href: "/app/diary", label: "Diary", icon: BookOpen },
+  { href: "/app/timeblocks", label: "Blocks", icon: LayoutGrid },
   { href: "/app/focus", label: "Focus", icon: Target },
   { href: "/app/stats", label: "Stats", icon: BarChart3 },
 ];

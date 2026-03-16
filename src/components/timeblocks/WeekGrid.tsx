@@ -8,14 +8,12 @@ import {
   HOUR_START,
   HOUR_END,
   TOTAL_MINUTES,
-  minutesToLabel,
   hourToLabel,
   COLOR_HEX,
 } from "@/store/timeBlockStore";
 import type { TimeBlock } from "@/types";
 
-const ROWS = HOUR_END - HOUR_START;
-const ROW_HEIGHT = 18;
+const ROWS = HOUR_END - HOUR_START + 1;
 const START_BASE = HOUR_START * 60;
 
 interface WeekGridProps {
@@ -35,8 +33,8 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
   }, [blocks]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft">
-      <div className="flex border-b border-border bg-surface-muted/60">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft">
+      <div className="flex shrink-0 border-b border-border bg-surface-muted/60">
         <div className="w-10 shrink-0" />
         {DAY_LABELS.map((label, i) => (
           <button
@@ -49,13 +47,12 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
           </button>
         ))}
       </div>
-      <div className="flex" style={{ height: ROWS * ROW_HEIGHT }}>
+      <div className="flex min-h-0 flex-1">
         <div className="flex w-10 shrink-0 flex-col border-r border-border">
           {Array.from({ length: ROWS }, (_, i) => (
             <div
               key={i}
-              className="flex items-center justify-end pr-1 text-[10px] text-text-tertiary"
-              style={{ height: ROW_HEIGHT }}
+              className="flex flex-1 min-h-0 items-center justify-end pr-1 text-[10px] text-text-tertiary"
             >
               {hourToLabel(HOUR_START + i)}
             </div>
@@ -64,12 +61,14 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
         {[0, 1, 2, 3, 4].map((dayIndex) => (
           <div
             key={dayIndex}
-            className="relative flex-1 border-r border-border last:border-r-0"
-            style={{
-              height: ROWS * ROW_HEIGHT,
-              backgroundImage: `repeating-linear-gradient(to bottom, transparent, transparent ${ROW_HEIGHT - 1}px, var(--border) ${ROW_HEIGHT - 1}px, var(--border) ${ROW_HEIGHT}px)`,
-            }}
+            className="relative flex min-h-0 flex-1 flex-col border-r border-border last:border-r-0"
           >
+            <div
+              className="absolute inset-0 flex flex-col"
+              style={{
+                backgroundImage: `repeating-linear-gradient(to bottom, transparent, transparent calc(100% / ${ROWS} - 1px), var(--border) calc(100% / ${ROWS} - 1px), var(--border) calc(100% / ${ROWS}))`,
+              }}
+            />
             {blocksByDay[dayIndex].map((block) => {
               const topPct =
                 ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
@@ -100,6 +99,9 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
                 </motion.button>
               );
             })}
+            {Array.from({ length: ROWS }, (_, i) => (
+              <div key={i} className="min-h-0 flex-1" />
+            ))}
             <button
               type="button"
               onClick={() => onSelectDay(dayIndex)}

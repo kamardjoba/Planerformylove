@@ -24,7 +24,7 @@ export function TimeBlockPlanner() {
   };
 
   return (
-    <div className="relative min-h-[70vh] pb-24">
+    <div className="relative flex min-h-0 flex-1 flex-col pb-24">
       <AnimatePresence mode="wait">
         {viewMode === "week" ? (
           <motion.div
@@ -32,10 +32,10 @@ export function TimeBlockPlanner() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="space-y-4"
+            className="flex min-h-0 flex-1 flex-col gap-3"
           >
             <WeekGrid onSelectDay={openDayView} />
-            <p className="text-center text-xs text-text-tertiary">
+            <p className="shrink-0 text-center text-xs text-text-tertiary">
               Tap a day or a block to open the day view
             </p>
           </motion.div>

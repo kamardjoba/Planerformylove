@@ -6,11 +6,11 @@ import { TimeBlockPlanner } from "@/components/timeblocks/TimeBlockPlanner";
 
 export default function TimeBlocksPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-8">
+    <div className="mx-auto flex max-w-4xl flex-col px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-8 min-h-[calc(100vh-6rem)] md:min-h-[calc(100vh-5rem)]">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-4 shrink-0"
       >
         <h1 className="flex items-center gap-2 text-xl font-semibold text-text-primary sm:text-2xl">
           <LayoutGrid className="h-6 w-6 text-accent" />
@@ -20,7 +20,9 @@ export default function TimeBlocksPage() {
           Plan your week. Tap a day to see the timeline, drag to move, resize from the bottom.
         </p>
       </motion.div>
-      <TimeBlockPlanner />
+      <div className="min-h-0 flex-1">
+        <TimeBlockPlanner />
+      </div>
     </div>
   );
 }

@@ -19,11 +19,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       />
       <div className="flex min-h-0 flex-1 flex-col">
         <MobileHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex min-h-0 flex-1 flex-col overflow-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+        <main className="min-h-0 flex-1 overflow-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
           <KeyboardShortcuts />
-          <div className="min-h-0 flex-1">
-            {children}
-          </div>
+          {children}
         </main>
         <MobileBottomNav />
       </div>

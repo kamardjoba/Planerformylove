@@ -20,6 +20,8 @@ interface BlockCardProps {
 
 export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardProps) {
   const [resizing, setResizing] = useState(false);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
@@ -30,6 +32,20 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const topPct = ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
   const heightPct =
     ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
+  const duration = block.endMinutes - block.startMinutes;
+
+  const getPreviewStart = (offsetY: number) => {
+    if (!timelineRef.current) return block.startMinutes;
+    const height = timelineRef.current.scrollHeight;
+    const originalTopPx = (topPct / 100) * height;
+    const newTopPx = originalTopPx + offsetY;
+    const ratio = Math.max(0, Math.min(1, newTopPx / height));
+    const newStart = Math.round((START_BASE + ratio * TOTAL_MINUTES) / 15) * 15;
+    return Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
+  };
+
+  const previewStart = isDragging ? getPreviewStart(dragOffsetY) : block.startMinutes;
+  const previewEnd = Math.min(24 * 60, previewStart + duration);
 
   const handleResizeStart = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -78,7 +94,16 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       dragConstraints={timelineRef}
       dragElastic={0}
       dragMomentum={false}
+      onDragStart={() => {
+        setIsDragging(true);
+        setDragOffsetY(0);
+      }}
+      onDrag={(_, info) => {
+        setDragOffsetY(info.offset.y);
+      }}
       onDragEnd={(_, info) => {
+        setIsDragging(false);
+        setDragOffsetY(0);
         if (!onDragEnd || !timelineRef.current) return;
         const el = timelineRef.current;
         const height = el.scrollHeight;
@@ -116,7 +141,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{block.title || "Block"}</p>
             <p className="text-xs opacity-85">
-              {minutesToLabel(block.startMinutes)} – {minutesToLabel(block.endMinutes)}
+              {minutesToLabel(previewStart)} – {minutesToLabel(previewEnd)}
             </p>
           </div>
           <div className="flex gap-0.5">

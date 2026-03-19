@@ -13,12 +13,10 @@ import {
 } from "@/store/timeBlockStore";
 import type { TimeBlock } from "@/types";
 
-const ROWS = HOUR_END - HOUR_START + 1;
+// В сетке отображаем только интервалы 06:00..24:00 (18 интервалов),
+// поэтому “последнюю” 19-ю строку (24:00) не показываем.
+const ROWS = HOUR_END - HOUR_START;
 const START_BASE = HOUR_START * 60;
-// Лейблы часов рендерятся для START..END включительно (ROWS = INTERVALS + 1),
-// но диапазон времени в секундах/минутах занимает только INTERVALS часов.
-const INTERVALS = HOUR_END - HOUR_START;
-const INTERVAL_SCALE = INTERVALS / ROWS;
 
 interface WeekGridProps {
   onSelectDay: (dayIndex: number) => void;
@@ -75,9 +73,9 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
             />
             {blocksByDay[dayIndex].map((block) => {
               const topPct =
-                ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
+                ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
               const heightPct =
-                ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
+                ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
               const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
               return (
                 <motion.button

@@ -52,7 +52,7 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
           {Array.from({ length: ROWS }, (_, i) => (
             <div
               key={i}
-              className="flex flex-1 min-h-0 items-center justify-end pr-1 text-[10px] text-text-tertiary leading-none"
+              className="flex flex-1 min-h-0 items-start justify-end pr-1 pt-1 text-[10px] text-text-tertiary leading-none"
             >
               {hourToLabel(HOUR_START + i)}
             </div>

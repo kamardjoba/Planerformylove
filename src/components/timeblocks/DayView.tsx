@@ -118,7 +118,7 @@ export function DayView({
               className="flex items-center border-b border-border/60"
               style={{ height: ROW_HEIGHT }}
             >
-              <div className="flex w-12 shrink-0 items-center justify-end pr-1 text-xs text-text-tertiary leading-none">
+              <div className="flex w-12 shrink-0 items-start justify-end pr-1 pt-1 text-xs text-text-tertiary leading-none">
                 {hourToLabel(HOUR_START + i)}
               </div>
               <div className="flex-1" />

@@ -109,7 +109,7 @@ export function DayView({
       >
         <div
           id="day-block-area"
-          className="relative"
+          className="relative overflow-hidden"
           style={{ height: ROWS * ROW_HEIGHT, minHeight: ROWS * ROW_HEIGHT }}
         >
           {Array.from({ length: ROWS }, (_, i) => (

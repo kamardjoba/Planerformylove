@@ -10,6 +10,13 @@ import { HOUR_START, HOUR_END } from "@/store/timeBlockStore";
 const TOTAL_MINUTES = (24 - HOUR_START) * 60;
 const START_BASE = HOUR_START * 60;
 const MIN_DURATION = 30;
+// В разметке DayView есть подписи часов от START..END включительно (ROWS = 19),
+// но интервалы времени занимают только (END-START) часов (18 интервалов).
+// Поэтому при маппинге минут <-> высоты используем эффективную высоту = total - ROW_HEIGHT.
+const ROW_HEIGHT = 48;
+const ROWS = 1 + (HOUR_END - HOUR_START);
+const INTERVALS = HOUR_END - HOUR_START;
+const INTERVAL_SCALE = INTERVALS / ROWS;
 
 interface BlockCardProps {
   block: TimeBlock;
@@ -39,9 +46,12 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     : optimisticStart ?? block.startMinutes;
   const previewEnd = Math.min(24 * 60, previewStart + duration);
 
-  const topPct = ((previewStart - START_BASE) / TOTAL_MINUTES) * 100;
+  // Позиционируем внутри "временного" участка (18 часов из 19 строк),
+  // чтобы 19:00-20:00 и 23:00-24:00 совпадали с линиями.
+  const topPct =
+    ((previewStart - START_BASE) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
   const heightPct =
-    ((previewEnd - previewStart) / TOTAL_MINUTES) * 100;
+    ((previewEnd - previewStart) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
 
   useEffect(() => {
     if (optimisticStart !== null && block.startMinutes === optimisticStart) {
@@ -100,9 +110,11 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       dragMomentum={false}
       onDragStart={() => {
         const contentEl = document.getElementById("day-block-area");
-        const h = contentEl?.clientHeight ?? 1;
-        dragContentHeightPx.current = h;
-        dragStartTopPx.current = (topPct / 100) * h;
+        const totalH = contentEl?.clientHeight ?? 1;
+        const effectiveH = Math.max(1, totalH - ROW_HEIGHT);
+        dragContentHeightPx.current = effectiveH;
+        dragStartTopPx.current =
+          ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * effectiveH;
         setDragPreviewStart(block.startMinutes);
       }}
       onDrag={(_, info) => {
@@ -112,10 +124,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         const newStart = Math.round(
           (START_BASE + ratio * TOTAL_MINUTES) / 15
         ) * 15;
-        const clamped = Math.max(
-          START_BASE,
-          Math.min(23 * 60 - MIN_DURATION, newStart)
-        );
+        const startMax = 24 * 60 - duration;
+        const clamped = Math.max(START_BASE, Math.min(startMax, newStart));
         setDragPreviewStart(clamped);
       }}
       onDragEnd={(_, info) => {
@@ -126,10 +136,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         const newStart = Math.round(
           (START_BASE + ratio * TOTAL_MINUTES) / 15
         ) * 15;
-        const clamped = Math.max(
-          START_BASE,
-          Math.min(23 * 60 - MIN_DURATION, newStart)
-        );
+        const startMax = 24 * 60 - duration;
+        const clamped = Math.max(START_BASE, Math.min(startMax, newStart));
         setOptimisticStart(clamped);
         setIsDragging(false);
         setDragPreviewStart(null);

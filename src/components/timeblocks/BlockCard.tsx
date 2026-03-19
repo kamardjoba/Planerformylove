@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { GripVertical, Trash2, MoreHorizontal } from "lucide-react";
 import type { TimeBlock } from "@/types";
 import { useTimeBlockStore, COLOR_HEX, minutesToLabel } from "@/store/timeBlockStore";
@@ -20,6 +20,7 @@ interface BlockCardProps {
 
 export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardProps) {
   const [resizing, setResizing] = useState(false);
+  const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
@@ -72,6 +73,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       data-block-id={block.id}
       layout
       drag={onDragEnd ? "y" : false}
+      dragListener={false}
+      dragControls={dragControls}
       dragConstraints={timelineRef}
       dragElastic={0}
       dragMomentum={false}
@@ -89,7 +92,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="absolute left-1 right-1 flex flex-col rounded-xl shadow-md touch-none"
+      className="absolute left-1 right-1 flex flex-col rounded-xl shadow-md"
       style={{
         top: `${topPct}%`,
         height: `${heightPct}%`,
@@ -103,7 +106,10 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         <div className="flex items-start gap-1 p-2">
           <div
             className="cursor-grab active:cursor-grabbing touch-none"
-            onPointerDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              dragControls.start(e);
+            }}
           >
             <GripVertical className="h-4 w-4 opacity-80" />
           </div>

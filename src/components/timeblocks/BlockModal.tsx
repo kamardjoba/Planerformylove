@@ -94,6 +94,14 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
     onClose();
   };
 
+  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key !== "Enter") return;
+    const target = e.target as HTMLElement;
+    if (target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    (target as HTMLInputElement | HTMLSelectElement).blur?.();
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -124,7 +132,11 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
               <X className="h-5 w-5" />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={handleFormKeyDown}
+            className="space-y-4"
+          >
             <div>
               <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Title

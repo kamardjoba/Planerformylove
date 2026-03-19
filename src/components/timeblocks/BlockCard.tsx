@@ -10,13 +10,7 @@ import { HOUR_START, HOUR_END } from "@/store/timeBlockStore";
 const TOTAL_MINUTES = (24 - HOUR_START) * 60;
 const START_BASE = HOUR_START * 60;
 const MIN_DURATION = 30;
-// В разметке DayView есть подписи часов от START..END включительно (ROWS = 19),
-// но интервалы времени занимают только (END-START) часов (18 интервалов).
-// Поэтому при маппинге минут <-> высоты используем эффективную высоту = total - ROW_HEIGHT.
 const ROW_HEIGHT = 48;
-const ROWS = 1 + (HOUR_END - HOUR_START);
-const INTERVALS = HOUR_END - HOUR_START;
-const INTERVAL_SCALE = INTERVALS / ROWS;
 
 interface BlockCardProps {
   block: TimeBlock;
@@ -54,9 +48,9 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   // Позиционируем внутри "временного" участка (18 часов из 19 строк),
   // чтобы 19:00-20:00 и 23:00-24:00 совпадали с линиями.
   const topPct =
-    ((previewStart - START_BASE) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
+    ((previewStart - START_BASE) / TOTAL_MINUTES) * 100;
   const heightPct =
-    ((previewEnd - previewStart) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
+    ((previewEnd - previewStart) / TOTAL_MINUTES) * 100;
 
   useEffect(() => {
     if (optimisticStart !== null && block.startMinutes === optimisticStart) {
@@ -116,10 +110,11 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       onDragStart={() => {
         const contentEl = document.getElementById("day-block-area");
         const totalH = contentEl?.clientHeight ?? 1;
-        const effectiveH = Math.max(1, totalH - ROW_HEIGHT);
-        dragContentHeightPx.current = effectiveH;
+        // Для DayView мы рисуем только 18 интервалов (без 24:00 строки),
+        // поэтому высота mapping = полной высоте day-block-area.
+        dragContentHeightPx.current = Math.max(1, totalH);
         dragStartTopPx.current =
-          ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * effectiveH;
+          ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * totalH;
         setDragPreviewStart(block.startMinutes);
       }}
       onDrag={(_, info) => {

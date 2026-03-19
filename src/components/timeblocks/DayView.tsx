@@ -8,7 +8,9 @@ import { BlockCard } from "./BlockCard";
 import type { TimeBlock } from "@/types";
 
 const ROW_HEIGHT = 48;
-const ROWS = HOUR_END - HOUR_START + 1;
+// Показать только интервалы 06:00..24:00 (18 интервалов),
+// поэтому последнюю "19-ю" строку (под 24:00) не рисуем.
+const ROWS = HOUR_END - HOUR_START;
 const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60;
 const START_BASE = HOUR_START * 60;
 

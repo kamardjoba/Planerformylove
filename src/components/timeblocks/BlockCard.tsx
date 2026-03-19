@@ -20,9 +20,10 @@ interface BlockCardProps {
 
 export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardProps) {
   const [resizing, setResizing] = useState(false);
-  const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [optimisticStart, setOptimisticStart] = useState<number | null>(null);
+  const [dragPreviewStart, setDragPreviewStart] = useState<number | null>(null);
+  const pointerOffsetWithinBlockPx = useRef(0);
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
@@ -35,19 +36,17 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
   const duration = block.endMinutes - block.startMinutes;
 
-  const getPreviewStart = (offsetY: number) => {
-    if (!timelineRef.current) return block.startMinutes;
-    const height = timelineRef.current.scrollHeight;
-    const originalTopPx = (topPct / 100) * height;
-    const newTopPx = originalTopPx + offsetY;
-    const ratio = Math.max(0, Math.min(1, newTopPx / height));
+  const computeStartFromPointerY = (pointerYContentPx: number) => {
+    const timeline = timelineRef.current;
+    if (!timeline) return block.startMinutes;
+    const heightPx = timeline.scrollHeight;
+    const blockTopPx = pointerYContentPx - pointerOffsetWithinBlockPx.current;
+    const ratio = Math.max(0, Math.min(1, blockTopPx / heightPx));
     const newStart = Math.round((START_BASE + ratio * TOTAL_MINUTES) / 15) * 15;
     return Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
   };
 
-  const previewStart = isDragging
-    ? getPreviewStart(dragOffsetY)
-    : (optimisticStart ?? block.startMinutes);
+  const previewStart = isDragging ? (dragPreviewStart ?? block.startMinutes) : (optimisticStart ?? block.startMinutes);
   const previewEnd = Math.min(24 * 60, previewStart + duration);
 
   useEffect(() => {
@@ -103,25 +102,22 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       dragConstraints={timelineRef}
       dragElastic={0}
       dragMomentum={false}
-      onDragStart={() => {
-        setIsDragging(true);
-        setDragOffsetY(0);
-      }}
       onDrag={(_, info) => {
-        setDragOffsetY(info.offset.y);
+        const timeline = timelineRef.current;
+        if (!timeline) return;
+        const rect = timeline.getBoundingClientRect();
+        const pointerYContentPx = info.point.y - rect.top + timeline.scrollTop;
+        setDragPreviewStart(computeStartFromPointerY(pointerYContentPx));
       }}
       onDragEnd={(_, info) => {
         if (!onDragEnd || !timelineRef.current) return;
-        const el = timelineRef.current;
-        const height = el.scrollHeight;
-        const originalTopPx = (topPct / 100) * height;
-        const newTopPx = originalTopPx + info.offset.y;
-        const ratio = Math.max(0, Math.min(1, newTopPx / height));
-        const newStart = Math.round((START_BASE + ratio * TOTAL_MINUTES) / 15) * 15;
-        const clamped = Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
+        const timeline = timelineRef.current;
+        const rect = timeline.getBoundingClientRect();
+        const pointerYContentPx = info.point.y - rect.top + timeline.scrollTop;
+        const clamped = computeStartFromPointerY(pointerYContentPx);
         setOptimisticStart(clamped);
         setIsDragging(false);
-        setDragOffsetY(0);
+        setDragPreviewStart(null);
         onDragEnd(block, clamped);
       }}
       initial={{ opacity: 0, y: -4 }}
@@ -144,9 +140,24 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             onPointerDown={(e) => {
               e.stopPropagation();
               // Сбрасываем состояние превью перед каждым новым drag.
+              pointerOffsetWithinBlockPx.current = 0;
               setOptimisticStart(null);
               setIsDragging(true);
-              setDragOffsetY(0);
+              setDragPreviewStart(block.startMinutes);
+
+              // Calculate where inside the block the user touched, so drag->time mapping
+              // stays correct even if you grab the block not from its top.
+              const timeline = timelineRef.current;
+              if (timeline) {
+                const rect = timeline.getBoundingClientRect();
+                const pointerYContentPx =
+                  e.clientY - rect.top + timeline.scrollTop;
+                const heightPx = timeline.scrollHeight;
+                const blockTopPx = (topPct / 100) * heightPx;
+                pointerOffsetWithinBlockPx.current =
+                  pointerYContentPx - blockTopPx;
+              }
+
               dragControls.start(e);
             }}
           >

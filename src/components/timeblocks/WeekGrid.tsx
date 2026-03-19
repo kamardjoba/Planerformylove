@@ -15,6 +15,10 @@ import type { TimeBlock } from "@/types";
 
 const ROWS = HOUR_END - HOUR_START + 1;
 const START_BASE = HOUR_START * 60;
+// Лейблы часов рендерятся для START..END включительно (ROWS = INTERVALS + 1),
+// но диапазон времени в секундах/минутах занимает только INTERVALS часов.
+const INTERVALS = HOUR_END - HOUR_START;
+const INTERVAL_SCALE = INTERVALS / ROWS;
 
 interface WeekGridProps {
   onSelectDay: (dayIndex: number) => void;
@@ -71,9 +75,9 @@ export function WeekGrid({ onSelectDay }: WeekGridProps) {
             />
             {blocksByDay[dayIndex].map((block) => {
               const topPct =
-                ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
+                ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
               const heightPct =
-                ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
+                ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100 * INTERVAL_SCALE;
               const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
               return (
                 <motion.button

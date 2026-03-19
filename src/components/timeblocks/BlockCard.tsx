@@ -23,7 +23,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const [isDragging, setIsDragging] = useState(false);
   const [optimisticStart, setOptimisticStart] = useState<number | null>(null);
   const [dragPreviewStart, setDragPreviewStart] = useState<number | null>(null);
-  const pointerOffsetWithinBlockPx = useRef(0);
+  const dragStartTopPx = useRef(0);
+  const dragContentHeightPx = useRef(1);
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
@@ -35,16 +36,6 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const heightPct =
     ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
   const duration = block.endMinutes - block.startMinutes;
-
-  const computeStartFromPointerY = (pointerYContentPx: number) => {
-    const timeline = timelineRef.current;
-    if (!timeline) return block.startMinutes;
-    const heightPx = timeline.scrollHeight;
-    const blockTopPx = pointerYContentPx - pointerOffsetWithinBlockPx.current;
-    const ratio = Math.max(0, Math.min(1, blockTopPx / heightPx));
-    const newStart = Math.round((START_BASE + ratio * TOTAL_MINUTES) / 15) * 15;
-    return Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
-  };
 
   const previewStart = isDragging ? (dragPreviewStart ?? block.startMinutes) : (optimisticStart ?? block.startMinutes);
   const previewEnd = Math.min(24 * 60, previewStart + duration);
@@ -66,7 +57,9 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const handleResizeMove = (e: PointerEvent) => {
     if (!resizing) return;
     const deltaY = e.clientY - startY.current;
-    const pixelsPerMinute = (document.getElementById("day-timeline-height")?.clientHeight ?? 400) / TOTAL_MINUTES;
+    const pixelsPerMinute =
+      (document.getElementById("day-block-area")?.clientHeight ?? 400) /
+      TOTAL_MINUTES;
     const deltaMinutes = Math.round(deltaY / pixelsPerMinute);
     const newEnd = Math.max(
       block.startMinutes + MIN_DURATION,
@@ -102,19 +95,38 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       dragConstraints={timelineRef}
       dragElastic={0}
       dragMomentum={false}
+      onDragStart={() => {
+        const contentEl = document.getElementById("day-block-area");
+        const h = contentEl?.clientHeight ?? 1;
+        dragContentHeightPx.current = h;
+        dragStartTopPx.current = (topPct / 100) * h;
+        setDragPreviewStart(block.startMinutes);
+      }}
       onDrag={(_, info) => {
-        const timeline = timelineRef.current;
-        if (!timeline) return;
-        const rect = timeline.getBoundingClientRect();
-        const pointerYContentPx = info.point.y - rect.top + timeline.scrollTop;
-        setDragPreviewStart(computeStartFromPointerY(pointerYContentPx));
+        const contentHeight = dragContentHeightPx.current || 1;
+        const newTopPx = dragStartTopPx.current + info.offset.y;
+        const ratio = Math.max(0, Math.min(1, newTopPx / contentHeight));
+        const newStart = Math.round(
+          (START_BASE + ratio * TOTAL_MINUTES) / 15
+        ) * 15;
+        const clamped = Math.max(
+          START_BASE,
+          Math.min(23 * 60 - MIN_DURATION, newStart)
+        );
+        setDragPreviewStart(clamped);
       }}
       onDragEnd={(_, info) => {
-        if (!onDragEnd || !timelineRef.current) return;
-        const timeline = timelineRef.current;
-        const rect = timeline.getBoundingClientRect();
-        const pointerYContentPx = info.point.y - rect.top + timeline.scrollTop;
-        const clamped = computeStartFromPointerY(pointerYContentPx);
+        if (!onDragEnd) return;
+        const contentHeight = dragContentHeightPx.current || 1;
+        const newTopPx = dragStartTopPx.current + info.offset.y;
+        const ratio = Math.max(0, Math.min(1, newTopPx / contentHeight));
+        const newStart = Math.round(
+          (START_BASE + ratio * TOTAL_MINUTES) / 15
+        ) * 15;
+        const clamped = Math.max(
+          START_BASE,
+          Math.min(23 * 60 - MIN_DURATION, newStart)
+        );
         setOptimisticStart(clamped);
         setIsDragging(false);
         setDragPreviewStart(null);
@@ -140,24 +152,9 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             onPointerDown={(e) => {
               e.stopPropagation();
               // Сбрасываем состояние превью перед каждым новым drag.
-              pointerOffsetWithinBlockPx.current = 0;
               setOptimisticStart(null);
               setIsDragging(true);
               setDragPreviewStart(block.startMinutes);
-
-              // Calculate where inside the block the user touched, so drag->time mapping
-              // stays correct even if you grab the block not from its top.
-              const timeline = timelineRef.current;
-              if (timeline) {
-                const rect = timeline.getBoundingClientRect();
-                const pointerYContentPx =
-                  e.clientY - rect.top + timeline.scrollTop;
-                const heightPx = timeline.scrollHeight;
-                const blockTopPx = (topPct / 100) * heightPx;
-                pointerOffsetWithinBlockPx.current =
-                  pointerYContentPx - blockTopPx;
-              }
-
               dragControls.start(e);
             }}
           >

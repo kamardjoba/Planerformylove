@@ -31,15 +31,21 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
   const [title, setTitle] = useState("");
   const [color, setColor] = useState<TimeBlockColor>("indigo");
   const [priority, setPriority] = useState<Priority>("medium");
-  const [startHour, setStartHour] = useState(9);
-  const [startMinute, setStartMinute] = useState(0);
-  const [endHour, setEndHour] = useState(10);
-  const [endMinute, setEndMinute] = useState(0);
+  const [startHour, setStartHour] = useState<number | "">(9);
+  const [startMinute, setStartMinute] = useState<number | "">(0);
+  const [endHour, setEndHour] = useState<number | "">(10);
+  const [endMinute, setEndMinute] = useState<number | "">(0);
   const [selectedDay, setSelectedDay] = useState(dayIndex);
 
   const ensureFieldVisible = (e: React.FocusEvent<HTMLElement>) => {
     e.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" });
   };
+
+  const startHourNum = typeof startHour === "number" ? startHour : null;
+  const startMinuteNum =
+    typeof startMinute === "number" ? startMinute : null;
+  const endHourNum = typeof endHour === "number" ? endHour : null;
+  const endMinuteNum = typeof endMinute === "number" ? endMinute : null;
 
   useEffect(() => {
     if (block) {
@@ -66,11 +72,18 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const safeStartHour = startHourNum ?? HOUR_START;
+    const safeStartMinute = startMinuteNum ?? 0;
+    const safeEndHour = endHourNum ?? HOUR_START + 1;
+    const safeEndMinute = endMinuteNum ?? 0;
+
     const startMinutes = Math.max(
       HOUR_START * 60,
-      timeToMinutes(startHour, startMinute)
+      timeToMinutes(safeStartHour, safeStartMinute)
     );
-    let endMinutes = timeToMinutes(endHour, endMinute);
+    let endMinutes = timeToMinutes(safeEndHour, safeEndMinute);
+    if (safeEndHour === 24) endMinutes = 24 * 60;
     if (endMinutes <= startMinutes) endMinutes = startMinutes + 30;
     endMinutes = Math.min(HOUR_END * 60, Math.max(startMinutes + 30, endMinutes));
     if (isEdit && block) {
@@ -179,8 +192,13 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     type="number"
                     min={HOUR_START}
                     max={23}
-                    value={startHour}
-                    onChange={(e) => setStartHour(parseInt(e.target.value, 10) || 0)}
+                    value={startHourNum ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return setStartHour("");
+                      const n = parseInt(v, 10);
+                      setStartHour(Number.isNaN(n) ? "" : n);
+                    }}
                     onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                   />
@@ -189,14 +207,22 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     type="number"
                     min={0}
                     max={59}
-                    value={startMinute}
-                    onChange={(e) => setStartMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    value={startMinuteNum ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return setStartMinute("");
+                      const n = parseInt(v, 10);
+                      if (Number.isNaN(n)) return setStartMinute("");
+                      setStartMinute(Math.min(59, Math.max(0, n)));
+                    }}
                     onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                   />
                 </div>
                 <p className="mt-0.5 text-xs text-text-tertiary">
-                  {minutesToLabel(timeToMinutes(startHour, startMinute))}
+                  {startHourNum !== null && startMinuteNum !== null
+                    ? minutesToLabel(timeToMinutes(startHourNum, startMinuteNum))
+                    : ""}
                 </p>
               </div>
               <div>
@@ -208,11 +234,22 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     type="number"
                     min={HOUR_START}
                     max={24}
-                    value={endHour}
+                    value={endHourNum ?? ""}
                     onChange={(e) => {
-                      const v = parseInt(e.target.value, 10) || 0;
-                      setEndHour(v);
-                      if (v === 24) setEndMinute(0);
+                      const v = e.target.value;
+                      if (v === "") {
+                        setEndHour("");
+                        setEndMinute("");
+                        return;
+                      }
+                      const n = parseInt(v, 10);
+                      if (Number.isNaN(n)) {
+                        setEndHour("");
+                        setEndMinute("");
+                        return;
+                      }
+                      setEndHour(n);
+                      if (n === 24) setEndMinute(0);
                     }}
                     onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
@@ -222,15 +259,25 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     type="number"
                     min={0}
                     max={59}
-                    value={endMinute}
-                    onChange={(e) => setEndMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    value={endMinuteNum ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") return setEndMinute("");
+                      const n = parseInt(v, 10);
+                      if (Number.isNaN(n)) return setEndMinute("");
+                      setEndMinute(Math.min(59, Math.max(0, n)));
+                    }}
                     onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
-                    disabled={endHour === 24}
+                    disabled={endHourNum === 24}
                   />
                 </div>
                 <p className="mt-0.5 text-xs text-text-tertiary">
-                  {endHour === 24 ? "24:00" : minutesToLabel(timeToMinutes(endHour, endMinute))}
+                  {endHourNum === 24
+                    ? "24:00"
+                    : endHourNum !== null && endMinuteNum !== null
+                      ? minutesToLabel(timeToMinutes(endHourNum, endMinuteNum))
+                      : ""}
                 </p>
               </div>
             </div>

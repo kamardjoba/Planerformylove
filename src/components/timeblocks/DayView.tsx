@@ -108,7 +108,8 @@ export function DayView({
         style={{ minHeight: 0 }}
       >
         <div
-          className="relative pb-40"
+          id="day-block-area"
+          className="relative"
           style={{ height: ROWS * ROW_HEIGHT, minHeight: ROWS * ROW_HEIGHT }}
         >
           {Array.from({ length: ROWS }, (_, i) => (
@@ -135,6 +136,8 @@ export function DayView({
             ))}
           </AnimatePresence>
         </div>
+        {/* Extra scroll room below the last row so 24:00 can be scrolled above the "+" button */}
+        <div style={{ height: 240 }} aria-hidden="true" />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, useDragControls } from "framer-motion";
 import { GripVertical, Trash2, MoreHorizontal } from "lucide-react";
 import type { TimeBlock } from "@/types";
@@ -22,6 +22,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const [resizing, setResizing] = useState(false);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [optimisticStart, setOptimisticStart] = useState<number | null>(null);
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
@@ -44,8 +45,16 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     return Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
   };
 
-  const previewStart = isDragging ? getPreviewStart(dragOffsetY) : block.startMinutes;
+  const previewStart = isDragging
+    ? getPreviewStart(dragOffsetY)
+    : (optimisticStart ?? block.startMinutes);
   const previewEnd = Math.min(24 * 60, previewStart + duration);
+
+  useEffect(() => {
+    if (optimisticStart !== null && block.startMinutes === optimisticStart) {
+      setOptimisticStart(null);
+    }
+  }, [block.startMinutes, optimisticStart]);
 
   const handleResizeStart = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -102,8 +111,6 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         setDragOffsetY(info.offset.y);
       }}
       onDragEnd={(_, info) => {
-        setIsDragging(false);
-        setDragOffsetY(0);
         if (!onDragEnd || !timelineRef.current) return;
         const el = timelineRef.current;
         const height = el.scrollHeight;
@@ -112,6 +119,9 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         const ratio = Math.max(0, Math.min(1, newTopPx / height));
         const newStart = Math.round((START_BASE + ratio * TOTAL_MINUTES) / 15) * 15;
         const clamped = Math.max(START_BASE, Math.min(23 * 60 - MIN_DURATION, newStart));
+        setOptimisticStart(clamped);
+        setIsDragging(false);
+        setDragOffsetY(0);
         onDragEnd(block, clamped);
       }}
       initial={{ opacity: 0, y: -4 }}

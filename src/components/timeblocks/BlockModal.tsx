@@ -37,6 +37,10 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
   const [endMinute, setEndMinute] = useState(0);
   const [selectedDay, setSelectedDay] = useState(dayIndex);
 
+  const ensureFieldVisible = (e: React.FocusEvent<HTMLElement>) => {
+    e.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
+
   useEffect(() => {
     if (block) {
       setTitle(block.title);
@@ -96,7 +100,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+        className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/50 p-0 sm:items-center sm:p-4"
         onClick={onClose}
       >
         <motion.div
@@ -104,7 +108,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25 }}
-          className="w-full max-w-md rounded-t-2xl border border-border bg-surface-elevated p-5 shadow-glass sm:rounded-2xl"
+          className="w-full max-w-md max-h-[85dvh] overflow-y-auto rounded-t-2xl border border-border bg-surface-elevated p-5 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-glass sm:max-h-[90dvh] sm:rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-4 flex items-center justify-between">
@@ -129,6 +133,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onFocus={ensureFieldVisible}
                 placeholder="Meeting, focus time..."
                 className="w-full rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
                 autoFocus
@@ -141,6 +146,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
               <select
                 value={isEdit ? dayIndex : selectedDay}
                 onChange={(e) => setSelectedDay(parseInt(e.target.value, 10))}
+                onFocus={ensureFieldVisible}
                 className="w-full rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-text-primary focus:border-accent focus:outline-none"
                 disabled={isEdit}
               >
@@ -163,6 +169,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     max={23}
                     value={startHour}
                     onChange={(e) => setStartHour(parseInt(e.target.value, 10) || 0)}
+                    onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                   />
                   <span className="flex items-center text-text-tertiary">:</span>
@@ -172,6 +179,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     max={59}
                     value={startMinute}
                     onChange={(e) => setStartMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -194,6 +202,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                       setEndHour(v);
                       if (v === 24) setEndMinute(0);
                     }}
+                    onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                   />
                   <span className="flex items-center text-text-tertiary">:</span>
@@ -203,6 +212,7 @@ export function BlockModal({ block, dayIndex, onClose }: BlockModalProps) {
                     max={59}
                     value={endMinute}
                     onChange={(e) => setEndMinute(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
+                    onFocus={ensureFieldVisible}
                     className="w-16 rounded-xl border border-border bg-surface-muted px-3 py-2.5 text-center text-text-primary focus:border-accent focus:outline-none"
                     disabled={endHour === 24}
                   />

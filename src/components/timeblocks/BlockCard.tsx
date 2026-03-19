@@ -74,6 +74,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       drag={onDragEnd ? "y" : false}
       dragConstraints={timelineRef}
       dragElastic={0}
+      dragMomentum={false}
       onDragEnd={(_, info) => {
         if (!onDragEnd || !timelineRef.current) return;
         const el = timelineRef.current;

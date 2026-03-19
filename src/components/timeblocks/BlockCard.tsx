@@ -143,6 +143,10 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             className="cursor-grab active:cursor-grabbing touch-none"
             onPointerDown={(e) => {
               e.stopPropagation();
+              // Сбрасываем состояние превью перед каждым новым drag.
+              setOptimisticStart(null);
+              setIsDragging(true);
+              setDragOffsetY(0);
               dragControls.start(e);
             }}
           >

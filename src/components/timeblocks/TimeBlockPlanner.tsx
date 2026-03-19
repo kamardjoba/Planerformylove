@@ -46,7 +46,7 @@ export function TimeBlockPlanner() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", damping: 25 }}
-            className="-mx-4 flex min-h-0 flex-1 overflow-hidden sm:-mx-6 md:-mx-8"
+            className="relative left-1/2 -translate-x-1/2 w-screen min-h-0 flex-1 overflow-hidden md:left-auto md:translate-x-0 md:w-full"
           >
             <DayView
               dayIndex={selectedDayIndex}

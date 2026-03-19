@@ -52,7 +52,7 @@ export function DayView({
   );
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <div className="flex items-center justify-between gap-2 border-b border-border bg-surface-elevated px-2 py-3">
         <button
           type="button"

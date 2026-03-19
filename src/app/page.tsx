@@ -7,7 +7,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/app");
+    router.replace("/app/timeblocks");
   }, [router]);
 
   // Landing page is intentionally disabled on app start.

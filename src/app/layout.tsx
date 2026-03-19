@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { TelegramWebAppProvider } from "@/components/providers/TelegramWebAppProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,7 +37,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TelegramWebAppProvider />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -41,6 +41,7 @@
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior: none;
 }
 
 body {
@@ -50,6 +51,8 @@ body {
   background: var(--surface);
   color: var(--text-primary);
   min-height: 100vh;
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
 }
 
 /* Glassmorphism utility */

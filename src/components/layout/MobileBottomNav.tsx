@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
+  //LayoutDashboard,
   Calendar,
   ListTodo,
-  Target,
+ // Target,
   BarChart3,
   //BookOpen,
   LayoutGrid,
@@ -14,11 +14,11 @@ import {
 
 const navItems = [
   { href: "/app/timeblocks", label: "Blocks", icon: LayoutGrid },
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard },
+  //{ href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/planner", label: "Planner", icon: ListTodo },
   { href: "/app/calendar", label: "Calendar", icon: Calendar },
   //{ href: "/app/diary", label: "Diary", icon: BookOpen },
-  { href: "/app/focus", label: "Focus", icon: Target },
+  //{ href: "/app/focus", label: "Focus", icon: Target },
   { href: "/app/stats", label: "Stats", icon: BarChart3 },
 ];
 

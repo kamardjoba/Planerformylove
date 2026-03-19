@@ -100,11 +100,11 @@ export function DayView({
       <div
         ref={timelineRef}
         id="day-timeline-height"
-        className="relative flex-1 overflow-y-auto overflow-x-hidden"
+        className="relative flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch]"
         style={{ minHeight: 0 }}
       >
         <div
-          className="relative pb-4"
+          className="relative pb-40"
           style={{ height: ROWS * ROW_HEIGHT, minHeight: ROWS * ROW_HEIGHT }}
         >
           {Array.from({ length: ROWS }, (_, i) => (

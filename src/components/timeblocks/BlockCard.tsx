@@ -33,6 +33,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const dragStartTopPx = useRef(0);
   const dragContentHeightPx = useRef(1);
   const dragControls = useDragControls();
+  const [dragConstraintsEl, setDragConstraintsEl] = useState<HTMLElement | null>(null);
   const startY = useRef(0);
   const startEnd = useRef(0);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
@@ -45,6 +46,11 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     ? (dragPreviewStart ?? block.startMinutes)
     : optimisticStart ?? block.startMinutes;
   const previewEnd = Math.min(24 * 60, previewStart + duration);
+
+  useEffect(() => {
+    const el = document.getElementById("day-block-area");
+    if (el) setDragConstraintsEl(el);
+  }, []);
 
   // Позиционируем внутри "временного" участка (18 часов из 19 строк),
   // чтобы 19:00-20:00 и 23:00-24:00 совпадали с линиями.
@@ -105,7 +111,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       drag={onDragEnd ? "y" : false}
       dragListener={false}
       dragControls={dragControls}
-      dragConstraints={timelineRef}
+      dragConstraints={dragConstraintsEl ?? timelineRef}
       dragElastic={0}
       dragMomentum={false}
       onDragStart={() => {

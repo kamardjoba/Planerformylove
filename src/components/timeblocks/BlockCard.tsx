@@ -32,13 +32,16 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
   const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
 
-  const topPct = ((block.startMinutes - START_BASE) / TOTAL_MINUTES) * 100;
-  const heightPct =
-    ((block.endMinutes - block.startMinutes) / TOTAL_MINUTES) * 100;
-  const duration = block.endMinutes - block.startMinutes;
+  const duration = Math.max(MIN_DURATION, block.endMinutes - block.startMinutes);
 
-  const previewStart = isDragging ? (dragPreviewStart ?? block.startMinutes) : (optimisticStart ?? block.startMinutes);
+  const previewStart = isDragging
+    ? (dragPreviewStart ?? block.startMinutes)
+    : optimisticStart ?? block.startMinutes;
   const previewEnd = Math.min(24 * 60, previewStart + duration);
+
+  const topPct = ((previewStart - START_BASE) / TOTAL_MINUTES) * 100;
+  const heightPct =
+    ((previewEnd - previewStart) / TOTAL_MINUTES) * 100;
 
   useEffect(() => {
     if (optimisticStart !== null && block.startMinutes === optimisticStart) {

@@ -28,9 +28,13 @@ export function DayView({
   onEditBlock,
 }: DayViewProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
-  const getBlocksForDay = useTimeBlockStore((s) => s.getBlocksForDay);
   const moveBlock = useTimeBlockStore((s) => s.moveBlock);
-  const blocks = getBlocksForDay(dayIndex);
+  // Subscribe to actual blocks for this day, so UI re-renders after drag/drop.
+  const blocks = useTimeBlockStore((s) =>
+    s.blocks
+      .filter((b) => b.dayIndex === dayIndex)
+      .sort((a, b) => a.startMinutes - b.startMinutes)
+  );
 
   const handleBlockDragEnd = useCallback(
     (block: TimeBlock, newStartMinutes: number) => {

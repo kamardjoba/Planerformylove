@@ -157,23 +157,10 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl text-white"
         style={{ backgroundColor: bgColor }}
       >
-        <div
-          className="flex items-start gap-1 p-2 cursor-grab active:cursor-grabbing touch-none"
-          onPointerDown={(e) => {
-            const target = e.target as HTMLElement | null;
-            // Не начинаем drag, если пользователь нажал на кнопки.
-            if (target?.closest("button")) return;
-
-            e.stopPropagation();
-            // Сбрасываем состояние превью перед каждым новым drag.
-            setOptimisticStart(null);
-            setIsDragging(true);
-            setDragPreviewStart(block.startMinutes);
-            dragControls.start(e);
-          }}
-        >
+        <div className="flex items-start gap-1 p-2">
           <div
-            className="cursor-grab active:cursor-grabbing touch-none"
+            className="flex h-9 w-9 items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
+            style={{ touchAction: "none" }}
             onPointerDown={(e) => {
               e.stopPropagation();
               // Сбрасываем состояние превью перед каждым новым drag.
@@ -183,7 +170,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
               dragControls.start(e);
             }}
           >
-            <GripVertical className="h-4 w-4 opacity-80" />
+            <GripVertical className="h-5 w-5 opacity-80" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{block.title || "Block"}</p>
@@ -208,8 +195,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
                 const title = (block.title ?? "").trim();
                 const ok = window.confirm(
                   title
-                    ? `Dear, Remove this shit "${title}"?`
-                    : "Dear, Remove this shit?"
+                    ? `Ты точно хочешь удалить задание "${title}"?`
+                    : "Ты точно хочешь удалить это задание?"
                 );
                 if (ok) deleteBlock(block.id);
               }}
@@ -224,6 +211,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
           onPointerDown={onPointerDownResize}
           className="h-2 shrink-0 cursor-ns-resize touch-none border-t border-white/20 active:bg-white/20"
           aria-label="Resize"
+          style={{ touchAction: "none" }}
         />
       </div>
     </motion.div>

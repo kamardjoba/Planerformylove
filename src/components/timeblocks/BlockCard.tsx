@@ -29,7 +29,6 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
-  const prevBodyOverflowRef = useRef<string | null>(null);
   const prevTimelineOverflowYRef = useRef<string | null>(null);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
@@ -64,12 +63,6 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   // чтобы перетаскивание не превращалось в scroll и не вызывало "сворачивание" UI.
   useEffect(() => {
     const disableScroll = () => {
-      const body = document.body;
-      if (prevBodyOverflowRef.current === null) {
-        prevBodyOverflowRef.current = body.style.overflow;
-      }
-      body.style.overflow = "hidden";
-
       const timeline = document.getElementById(
         "day-timeline-height"
       ) as HTMLDivElement | null;
@@ -81,12 +74,6 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     };
 
     const restoreScroll = () => {
-      const body = document.body;
-      if (prevBodyOverflowRef.current !== null) {
-        body.style.overflow = prevBodyOverflowRef.current;
-        prevBodyOverflowRef.current = null;
-      }
-
       const timeline = document.getElementById(
         "day-timeline-height"
       ) as HTMLDivElement | null;

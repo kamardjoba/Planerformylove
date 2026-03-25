@@ -31,6 +31,10 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const startEnd = useRef(0);
   const prevTimelineOverflowYRef = useRef<string | null>(null);
   const didDisableTelegramSwipesRef = useRef(false);
+  const prevHtmlTouchActionRef = useRef<string | null>(null);
+  const prevBodyTouchActionRef = useRef<string | null>(null);
+  const prevHtmlOverscrollBehaviorYRef = useRef<string | null>(null);
+  const prevBodyOverscrollBehaviorYRef = useRef<string | null>(null);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
   const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
@@ -80,6 +84,27 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         tg.disableVerticalSwipes();
         didDisableTelegramSwipesRef.current = true;
       }
+
+      // Отключаем потенциальный overscroll/вертикальные жесты на уровне html/body.
+      // Это уменьшает вероятность "сворачивания" именно в Telegram.
+      const html = document.documentElement;
+      const body = document.body;
+      if (prevHtmlTouchActionRef.current === null) {
+        prevHtmlTouchActionRef.current = html.style.touchAction;
+      }
+      if (prevBodyTouchActionRef.current === null) {
+        prevBodyTouchActionRef.current = body.style.touchAction;
+      }
+      if (prevHtmlOverscrollBehaviorYRef.current === null) {
+        prevHtmlOverscrollBehaviorYRef.current = (html.style as any).overscrollBehaviorY;
+      }
+      if (prevBodyOverscrollBehaviorYRef.current === null) {
+        prevBodyOverscrollBehaviorYRef.current = (body.style as any).overscrollBehaviorY;
+      }
+      html.style.touchAction = "none";
+      body.style.touchAction = "none";
+      (html.style as any).overscrollBehaviorY = "none";
+      (body.style as any).overscrollBehaviorY = "none";
     };
 
     const restoreScroll = () => {
@@ -100,6 +125,27 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         tg.enableVerticalSwipes();
       }
       didDisableTelegramSwipesRef.current = false;
+
+      const html = document.documentElement;
+      const body = document.body;
+      if (prevHtmlTouchActionRef.current !== null) {
+        html.style.touchAction = prevHtmlTouchActionRef.current;
+        prevHtmlTouchActionRef.current = null;
+      }
+      if (prevBodyTouchActionRef.current !== null) {
+        body.style.touchAction = prevBodyTouchActionRef.current;
+        prevBodyTouchActionRef.current = null;
+      }
+      if (prevHtmlOverscrollBehaviorYRef.current !== null) {
+        (html.style as any).overscrollBehaviorY =
+          prevHtmlOverscrollBehaviorYRef.current;
+        prevHtmlOverscrollBehaviorYRef.current = null;
+      }
+      if (prevBodyOverscrollBehaviorYRef.current !== null) {
+        (body.style as any).overscrollBehaviorY =
+          prevBodyOverscrollBehaviorYRef.current;
+        prevBodyOverscrollBehaviorYRef.current = null;
+      }
     };
 
     if (isDragging) disableScroll();
@@ -108,6 +154,26 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
     return () => {
       // На случай unmount во время drag.
       restoreScroll();
+    };
+  }, [isDragging]);
+
+  // Дополнительно: блокируем touchmove на самом скролл-контейнере таймлайна,
+  // чтобы iOS/Telegram не пытался "прокрутить" страницу во время drag вниз.
+  useEffect(() => {
+    if (!isDragging) return;
+    const timeline = document.getElementById(
+      "day-timeline-height"
+    ) as HTMLDivElement | null;
+    if (!timeline) return;
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    timeline.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      timeline.removeEventListener("touchmove", onTouchMove);
     };
   }, [isDragging]);
 
@@ -236,6 +302,30 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
                 timeline.style.overflowY = "hidden";
                 timeline.style.touchAction = "none";
               }
+
+              // На момент касания тоже отключаем overscroll/вертикальные жесты
+              // на уровне html/body (Telegram может реагировать на них раньше,
+              // чем сработает useEffect по isDragging).
+              const html = document.documentElement;
+              const body = document.body;
+              if (prevHtmlTouchActionRef.current === null) {
+                prevHtmlTouchActionRef.current = html.style.touchAction;
+              }
+              if (prevBodyTouchActionRef.current === null) {
+                prevBodyTouchActionRef.current = body.style.touchAction;
+              }
+              if (prevHtmlOverscrollBehaviorYRef.current === null) {
+                prevHtmlOverscrollBehaviorYRef.current = (html.style as any)
+                  .overscrollBehaviorY;
+              }
+              if (prevBodyOverscrollBehaviorYRef.current === null) {
+                prevBodyOverscrollBehaviorYRef.current = (body.style as any)
+                  .overscrollBehaviorY;
+              }
+              html.style.touchAction = "none";
+              body.style.touchAction = "none";
+              (html.style as any).overscrollBehaviorY = "none";
+              (body.style as any).overscrollBehaviorY = "none";
 
               // Сбрасываем состояние превью перед каждым новым drag.
               setOptimisticStart(null);

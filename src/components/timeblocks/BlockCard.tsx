@@ -206,6 +206,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
               dragControls.start(e);
             }}
           >
+
+            
             <GripVertical className="h-5 w-5 opacity-80" />
           </div>
           <div className="min-w-0 flex-1">

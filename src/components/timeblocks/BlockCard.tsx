@@ -217,6 +217,26 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             onPointerDown={(e) => {
               e.preventDefault();
               e.stopPropagation();
+
+              // Telegram Mini Apps может "свернуть" интерфейс при вертикальных жестах.
+              // Поэтому отключаем vertical swipes сразу на момент касания/начала drag.
+              const tg = (window as any)?.Telegram?.WebApp;
+              if (tg?.disableVerticalSwipes && !didDisableTelegramSwipesRef.current) {
+                tg.disableVerticalSwipes();
+                didDisableTelegramSwipesRef.current = true;
+              }
+
+              // Отключаем скролл именно в области таймлайна (без body),
+              // чтобы drag вниз не превращался в scroll.
+              const timeline = document.getElementById(
+                "day-timeline-height"
+              ) as HTMLDivElement | null;
+              if (timeline && prevTimelineOverflowYRef.current === null) {
+                prevTimelineOverflowYRef.current = timeline.style.overflowY;
+                timeline.style.overflowY = "hidden";
+                timeline.style.touchAction = "none";
+              }
+
               // Сбрасываем состояние превью перед каждым новым drag.
               setOptimisticStart(null);
               setIsDragging(true);
@@ -225,7 +245,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             }}
           >
 
-            
+
             <GripVertical className="h-5 w-5 opacity-80" />
           </div>
           <div className="min-w-0 flex-1">

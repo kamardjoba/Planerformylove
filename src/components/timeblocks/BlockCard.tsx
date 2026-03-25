@@ -157,7 +157,21 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl text-white"
         style={{ backgroundColor: bgColor }}
       >
-        <div className="flex items-start gap-1 p-2">
+        <div
+          className="flex items-start gap-1 p-2 cursor-grab active:cursor-grabbing touch-none"
+          onPointerDown={(e) => {
+            const target = e.target as HTMLElement | null;
+            // Не начинаем drag, если пользователь нажал на кнопки.
+            if (target?.closest("button")) return;
+
+            e.stopPropagation();
+            // Сбрасываем состояние превью перед каждым новым drag.
+            setOptimisticStart(null);
+            setIsDragging(true);
+            setDragPreviewStart(block.startMinutes);
+            dragControls.start(e);
+          }}
+        >
           <div
             className="cursor-grab active:cursor-grabbing touch-none"
             onPointerDown={(e) => {

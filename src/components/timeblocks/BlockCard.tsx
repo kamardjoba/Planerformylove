@@ -29,6 +29,8 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const dragControls = useDragControls();
   const startY = useRef(0);
   const startEnd = useRef(0);
+  const prevBodyOverflowRef = useRef<string | null>(null);
+  const prevTimelineOverflowYRef = useRef<string | null>(null);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
   const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
@@ -57,6 +59,52 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
       setOptimisticStart(null);
     }
   }, [block.startMinutes, optimisticStart]);
+
+  // Во время drag блокируем прокрутку страницы/контейнера,
+  // чтобы перетаскивание не превращалось в scroll и не вызывало "сворачивание" UI.
+  useEffect(() => {
+    const disableScroll = () => {
+      const body = document.body;
+      if (prevBodyOverflowRef.current === null) {
+        prevBodyOverflowRef.current = body.style.overflow;
+      }
+      body.style.overflow = "hidden";
+
+      const timeline = document.getElementById(
+        "day-timeline-height"
+      ) as HTMLDivElement | null;
+      if (timeline && prevTimelineOverflowYRef.current === null) {
+        prevTimelineOverflowYRef.current = timeline.style.overflowY;
+        timeline.style.overflowY = "hidden";
+        timeline.style.touchAction = "none";
+      }
+    };
+
+    const restoreScroll = () => {
+      const body = document.body;
+      if (prevBodyOverflowRef.current !== null) {
+        body.style.overflow = prevBodyOverflowRef.current;
+        prevBodyOverflowRef.current = null;
+      }
+
+      const timeline = document.getElementById(
+        "day-timeline-height"
+      ) as HTMLDivElement | null;
+      if (timeline && prevTimelineOverflowYRef.current !== null) {
+        timeline.style.overflowY = prevTimelineOverflowYRef.current;
+        timeline.style.touchAction = "";
+        prevTimelineOverflowYRef.current = null;
+      }
+    };
+
+    if (isDragging) disableScroll();
+    else restoreScroll();
+
+    return () => {
+      // На случай unmount во время drag.
+      restoreScroll();
+    };
+  }, [isDragging]);
 
   const handleResizeStart = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -162,6 +210,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             className="flex h-9 w-9 items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
             style={{ touchAction: "none" }}
             onPointerDown={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               // Сбрасываем состояние превью перед каждым новым drag.
               setOptimisticStart(null);

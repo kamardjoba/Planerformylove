@@ -30,6 +30,7 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
   const startY = useRef(0);
   const startEnd = useRef(0);
   const prevTimelineOverflowYRef = useRef<string | null>(null);
+  const didDisableTelegramSwipesRef = useRef(false);
   const resizeBlock = useTimeBlockStore((s) => s.resizeBlock);
   const deleteBlock = useTimeBlockStore((s) => s.deleteBlock);
   const bgColor = COLOR_HEX[block.color] ?? COLOR_HEX.indigo;
@@ -71,6 +72,14 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         timeline.style.overflowY = "hidden";
         timeline.style.touchAction = "none";
       }
+
+      // В Telegram Mini Apps вертикальные свайпы могут "сворачивать" приложение.
+      // Запрещаем это во время перетаскивания.
+      const tg = (window as any)?.Telegram?.WebApp;
+      if (tg?.disableVerticalSwipes && !didDisableTelegramSwipesRef.current) {
+        tg.disableVerticalSwipes();
+        didDisableTelegramSwipesRef.current = true;
+      }
     };
 
     const restoreScroll = () => {
@@ -82,6 +91,15 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
         timeline.style.touchAction = "";
         prevTimelineOverflowYRef.current = null;
       }
+
+      const tg = (window as any)?.Telegram?.WebApp;
+      if (
+        didDisableTelegramSwipesRef.current &&
+        tg?.enableVerticalSwipes
+      ) {
+        tg.enableVerticalSwipes();
+      }
+      didDisableTelegramSwipesRef.current = false;
     };
 
     if (isDragging) disableScroll();

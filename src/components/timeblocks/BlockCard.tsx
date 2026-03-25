@@ -188,7 +188,17 @@ export function BlockCard({ block, timelineRef, onEdit, onDragEnd }: BlockCardPr
             </button>
             <button
               type="button"
-              onClick={() => deleteBlock(block.id)}
+              onClick={(e) => {
+                // Не даем клику по кнопке разогнать/сработать как часть drag/interactions.
+                e.stopPropagation();
+                const title = (block.title ?? "").trim();
+                const ok = window.confirm(
+                  title
+                    ? `Dear, Remove this shit "${title}"?`
+                    : "Dear, Remove this shit?"
+                );
+                if (ok) deleteBlock(block.id);
+              }}
               className="rounded p-1 hover:bg-white/20"
               aria-label="Delete"
             >
